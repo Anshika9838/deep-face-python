@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DeepFace Verify</title>
+    <title>DeepFace</title>
     <style>
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; max-width: 900px; }
       h1 { margin: 0 0 12px; }
@@ -19,10 +19,11 @@
     </style>
   </head>
   <body>
-    <h1>DeepFace Verify</h1>
-    <p class="muted">Upload two face images and test whether they are the same person using <code>DeepFace.verify</code>.</p>
+    <h1>DeepFace</h1>
+    <p class="muted">Test face verification and search using <code>DeepFace.verify</code> and <code>DeepFace.find</code>.</p>
 
     <div class="card">
+      <h2>Compare (Verify)</h2>
       <div class="row">
         <div>
           <label for="image1">Image 1</label>
@@ -34,33 +35,53 @@
         </div>
       </div>
 
-      <button id="btn">Verify</button>
-      <div id="status" class="status"></div>
+      <button id="btnVerify">Verify</button>
+      <div id="statusVerify" class="status"></div>
       <h3>Response</h3>
-      <pre id="out">(no response yet)</pre>
+      <pre id="outVerify">(no response yet)</pre>
+    </div>
+
+    <div class="card" style="margin-top: 16px;">
+      <h2>Search (Find)</h2>
+
+      <div class="row" style="grid-template-columns: 1fr;">
+        <div>
+          <label for="findImage">Query Image</label>
+          <input id="findImage" type="file" accept="image/*" />
+        </div>
+      </div>
+
+      <button id="btnFind">Find</button>
+      <div id="statusFind" class="status"></div>
+      <h3>Response</h3>
+      <pre id="outFind">(no response yet)</pre>
     </div>
 
     <script>
-      const btn = document.getElementById('btn');
-      const out = document.getElementById('out');
-      const statusEl = document.getElementById('status');
+      const btnVerify = document.getElementById('btnVerify');
+      const outVerify = document.getElementById('outVerify');
+      const statusVerifyEl = document.getElementById('statusVerify');
 
-      function setStatus(msg) {
-        statusEl.textContent = msg;
+      const btnFind = document.getElementById('btnFind');
+      const outFind = document.getElementById('outFind');
+      const statusFindEl = document.getElementById('statusFind');
+
+      function setStatus(el, msg) {
+        el.textContent = msg;
       }
 
-      btn.addEventListener('click', async () => {
+      btnVerify.addEventListener('click', async () => {
         const f1 = document.getElementById('image1').files[0];
         const f2 = document.getElementById('image2').files[0];
 
         if (!f1 || !f2) {
-          setStatus('Please select both images.');
+          setStatus(statusVerifyEl, 'Please select both images.');
           return;
         }
 
-        btn.disabled = true;
-        setStatus('Verifying...');
-        out.textContent = '';
+        btnVerify.disabled = true;
+        setStatus(statusVerifyEl, 'Verifying...');
+        outVerify.textContent = '';
 
         try {
           const fd = new FormData();
@@ -77,17 +98,58 @@
           try { json = JSON.parse(text); } catch { json = { raw: text }; }
 
           if (!res.ok) {
-            setStatus('Request failed: ' + res.status);
+            setStatus(statusVerifyEl, 'Request failed: ' + res.status);
           } else {
-            setStatus('Done.');
+            setStatus(statusVerifyEl, 'Done.');
           }
 
-          out.textContent = JSON.stringify(json, null, 2);
+          outVerify.textContent = JSON.stringify(json, null, 2);
         } catch (e) {
-          setStatus('Error: ' + (e?.message || e));
-          out.textContent = String(e);
+          setStatus(statusVerifyEl, 'Error: ' + (e?.message || e));
+          outVerify.textContent = String(e);
         } finally {
-          btn.disabled = false;
+          btnVerify.disabled = false;
+        }
+      });
+
+      btnFind.addEventListener('click', async () => {
+        const f = document.getElementById('findImage').files[0];
+
+        if (!f) {
+          setStatus(statusFindEl, 'Please select an image.');
+          return;
+        }
+
+        btnFind.disabled = true;
+        setStatus(statusFindEl, 'Searching...');
+        outFind.textContent = '';
+
+        try {
+          const fd = new FormData();
+          fd.append('image', f);
+
+          const res = await fetch('/api/find', {
+            method: 'POST',
+            body: fd
+          });
+
+          const text = await res.text();
+          let json;
+          try { json = JSON.parse(text); } catch { json = { raw: text }; }
+
+          if (!res.ok) {
+            const detail = (json && json.detail) ? (' - ' + json.detail) : '';
+            setStatus(statusFindEl, 'Request failed: ' + res.status + detail);
+          } else {
+            setStatus(statusFindEl, 'Done.');
+          }
+
+          outFind.textContent = JSON.stringify(json, null, 2);
+        } catch (e) {
+          setStatus(statusFindEl, 'Error: ' + (e?.message || e));
+          outFind.textContent = String(e);
+        } finally {
+          btnFind.disabled = false;
         }
       });
     </script>
