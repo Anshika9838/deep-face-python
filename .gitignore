@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+
+# Vendored dependencies (DO NOT COMMIT)
+deepface/
+vendor/
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build / tooling
+build/
+dist/
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# DeepFace / ML caches (common)
+**/.deepface/
+**/.keras/
+**/keras_model*
+**/weights/
+**/models/
+
+# TensorFlow / Torch caches
+**/.tfhub_modules/
+**/.torch/
+
+# Local data (DO NOT COMMIT)
+all_photos/
+test/
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.bmp
+*.tiff
+*.gif
+
+# Temporary
+*.tmp
+*.temp
+*.swp
